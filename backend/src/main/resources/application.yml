@@ -1,0 +1,26 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: codesymphony-core
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=50,expireAfterWrite=1h
+
+codesymphony:
+  max-ingested-files: 800
+  max-visible-nodes: 150
+  parser-base-url: http://localhost:8001
+  clone-dir: ${java.io.tmpdir}/codesymphony-clones
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    com.codesymphony: INFO

@@ -1,0 +1,9 @@
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+pydantic>=2.9.0
+# Week 1: tree-sitter + language grammars
+# tree-sitter>=0.23.0
+# tree-sitter-javascript
+# tree-sitter-typescript
+# tree-sitter-python
+# tree-sitter-java
