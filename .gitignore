@@ -25,3 +25,9 @@
 .tmp/
 **/clones/
 *.log
+
+# Local-only engineering / art docs (do not publish)
+backend/guidelines.md
+client/guidelines_client.md
+client/ART_DIRECTION.md
+client/public/SIGNATURE_RIVE.md

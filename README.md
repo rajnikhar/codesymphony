@@ -3,53 +3,40 @@
 Paste a public GitHub URL → force-directed **file import** graph → scrub git history → nodes glow/pulse on commits.
 
 **v1 languages:** JavaScript/TypeScript, Python, Java  
-**v1 graph:** file-level imports (not call graphs)  
-**Unsupported langs (e.g. C++):** history-only mode (timeline pulses, no import edges)
+**v1 graph:** file-level imports (not call graphs)
 
 ## Layout
 
 ```
-backend/          # Spring Boot core API (Java 17)
-  src/            # JGit, JGraphT, WebSocket stubs
-  parser/         # FastAPI + tree-sitter sidecar
-client/           # React + Vite frontend
-docs/             # architecture + deployment
+backend/          # Spring Boot core API (Java 17) + parser sidecar
+  src/            # Layered per backend/guidelines.md
+  parser/         # FastAPI + tree-sitter
+  guidelines.md
+client/           # React + Vite (UI later)
+docs/
 ```
 
-## Quick start
-
-### 1. Parser (port 8001)
+## Quick start (backend + client)
 
 ```bash
-cd backend/parser
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+# Terminal 1 — parser
+cd backend/parser && source .venv/bin/activate
 uvicorn main:app --reload --port 8001
-```
 
-### 2. Backend (port 8080)
-
-```bash
+# Terminal 2 — Spring Boot
 cd backend
 export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ./mvnw spring-boot:run
+
+# Terminal 3 — React client
+cd client && npm install && npm run dev
 ```
 
-### 3. Client (port 5173)
-
-```bash
-cd client
-npm install
-npm run dev
-```
+Open `http://localhost:5173`, paste a GitHub URL, Visualize, scrub the timeline.
 
 ## Docs
 
 - [Architecture](docs/architecture.md)
+- [Backend guidelines](backend/guidelines.md)
 - [Deployment](docs/deployment.md)
 - [Later](LATER.md)
-- [Demo repos](DEMO_REPOS.md)
-
-## Done criteria (v1)
-
-> Paste a public GitHub URL → see a force-directed file import graph (directories by default) → drag a timeline → nodes glow/pulse in commit order over WebSocket-streamed history.
