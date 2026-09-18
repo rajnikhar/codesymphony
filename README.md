@@ -9,11 +9,9 @@ Paste a public GitHub URL → force-directed **file import** graph → scrub git
 
 ```
 backend/          # Spring Boot core API (Java 17) + parser sidecar
-  src/            # Layered per backend/guidelines.md
+  src/            # application, services, controllers
   parser/         # FastAPI + tree-sitter
-  guidelines.md
-client/           # React + Vite (UI later)
-docs/
+client/           # React + Vite story UI
 ```
 
 ## Quick start (backend + client)
@@ -33,10 +31,3 @@ cd client && npm install && npm run dev
 ```
 
 Open `http://localhost:5173`, paste a GitHub URL, Visualize, scrub the timeline.
-
-## Docs
-
-- [Architecture](docs/architecture.md)
-- [Backend guidelines](backend/guidelines.md)
-- [Deployment](docs/deployment.md)
-- [Later](LATER.md)

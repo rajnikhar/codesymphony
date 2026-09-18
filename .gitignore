@@ -31,3 +31,9 @@ backend/guidelines.md
 client/guidelines_client.md
 client/ART_DIRECTION.md
 client/public/SIGNATURE_RIVE.md
+docs/
+LATER.md
+DEMO_REPOS.md
+
+# Local-only tests (keep off GitHub for now)
+backend/src/test/
