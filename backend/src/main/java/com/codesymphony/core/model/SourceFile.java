@@ -1,9 +1,8 @@
 package com.codesymphony.core.model;
 
-public record GraphNode(
-    String id,
+public record SourceFile(
     String path,
-    String kind,
+    String language,
     int commitCount,
     int churn
 ) {}

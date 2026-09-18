@@ -1,6 +1,6 @@
 package com.codesymphony.core.model;
 
-public enum RepoMode {
+public enum RepositoryMode {
   FULL,
   HISTORY_ONLY
 }

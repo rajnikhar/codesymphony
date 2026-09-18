@@ -1,0 +1,50 @@
+package com.codesymphony.core.config;
+
+import com.github.benmanes.caffeine.cache.Caffeine;
+import java.time.Duration;
+import java.util.concurrent.TimeUnit;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.web.client.RestClient;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+@EnableCaching
+public class CacheConfig {
+
+  public static final String PARSED_REPOSITORY_CACHE = "parsedRepositories";
+
+  @Bean
+  CacheManager cacheManager() {
+    CaffeineCacheManager cacheManager = new CaffeineCacheManager(PARSED_REPOSITORY_CACHE);
+    cacheManager.setCaffeine(
+        Caffeine.newBuilder().maximumSize(50).expireAfterWrite(1, TimeUnit.HOURS));
+    return cacheManager;
+  }
+
+  @Bean
+  RestClient.Builder restClientBuilder() {
+    SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+    requestFactory.setConnectTimeout(Duration.ofSeconds(10));
+    requestFactory.setReadTimeout(Duration.ofMinutes(2));
+    return RestClient.builder().requestFactory(requestFactory);
+  }
+
+  @Bean
+  WebMvcConfigurer corsConfigurer() {
+    return new WebMvcConfigurer() {
+      @Override
+      public void addCorsMappings(CorsRegistry registry) {
+        registry
+            .addMapping("/api/**")
+            .allowedOrigins("http://localhost:5173")
+            .allowedMethods("GET", "POST", "OPTIONS");
+      }
+    };
+  }
+}

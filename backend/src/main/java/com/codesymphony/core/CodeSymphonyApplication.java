@@ -2,13 +2,13 @@ package com.codesymphony.core;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 
 @SpringBootApplication
-@EnableCaching
-public class CoreApplication {
+@ConfigurationPropertiesScan
+public class CodeSymphonyApplication {
 
   public static void main(String[] args) {
-    SpringApplication.run(CoreApplication.class, args);
+    SpringApplication.run(CodeSymphonyApplication.class, args);
   }
 }
