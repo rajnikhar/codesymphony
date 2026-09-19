@@ -38,16 +38,10 @@ export function StoryLoading({ url }: StoryLoadingProps) {
     : 'your repository'
 
   return (
-    <div className="story-loading" role="status" aria-live="polite">
-      <div className="story-loading-orb" aria-hidden />
-      <p className="story-kicker">Composing</p>
-      <p className="story-title">Building the story of {label}</p>
-      <ol className="loading-beats">
-        <li>Cloning &amp; reading history</li>
-        <li>Tracing imports</li>
-        <li>Opening the stage</li>
-      </ol>
-      <p className="muted-line">This can take a moment on larger repos.</p>
+    <div className="story-loading tree-loading" role="status" aria-live="polite">
+      <div className="tree-loading-spinner" aria-hidden />
+      <p className="story-title">Cloning and reading history…</p>
+      <p className="muted-line">{label}</p>
     </div>
   )
 }

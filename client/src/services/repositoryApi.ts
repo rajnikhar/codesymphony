@@ -5,6 +5,7 @@ import type {
   GraphResponse,
   RepositoryStatus,
   TimelineResponse,
+  TreeResponse,
 } from '../types'
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? 'http://localhost:8090'
@@ -75,6 +76,11 @@ export async function fetchNeighborhood(
     `${API_BASE}/api/repos/${repositoryId}/files/neighborhood?${params}`,
   )
   return readJson<FileNeighborhood>(response)
+}
+
+export async function fetchTree(repositoryId: string): Promise<TreeResponse> {
+  const response = await fetch(`${API_BASE}/api/repos/${repositoryId}/tree`)
+  return readJson<TreeResponse>(response)
 }
 
 export async function explainFile(

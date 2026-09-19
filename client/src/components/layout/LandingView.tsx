@@ -44,10 +44,10 @@ export function LandingView({
 
       <header className="header landing-hero">
         <div>
-          <h1>A guided story of how code fits together</h1>
+          <h1>Paste a repo. Understand it simply.</h1>
           <p className="tagline">
-            Light, paced chapters and plain-English explanations. The raw map
-            stays optional.
+            A brief, a path through the code, and a short tour — then dig into
+            Spine, History, or Playground.
           </p>
         </div>
       </header>

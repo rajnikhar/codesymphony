@@ -1,6 +1,6 @@
 import type { GraphEdge, GraphNode, TimelineCommit } from '../types'
 
-export type StoryChapter = 'overview' | 'spine' | 'links' | 'history'
+export type StoryChapter = 'overview' | 'spine' | 'links' | 'history' | 'playground'
 
 export type SpineFile = {
   path: string
@@ -32,19 +32,60 @@ function shortName(path: string): string {
   return path.split('/').pop() ?? path
 }
 
+function isNonCodePath(path: string): boolean {
+  const lower = path.replace(/\\/g, '/').toLowerCase()
+  const name = lower.slice(lower.lastIndexOf('/') + 1)
+  if (!name) {
+    return true
+  }
+  if (
+    name === 'license' ||
+    name === 'licence' ||
+    name.startsWith('license.') ||
+    name.startsWith('licence.') ||
+    name === 'copying' ||
+    name === 'changelog' ||
+    name === 'authors' ||
+    name === 'contributors' ||
+    name.startsWith('readme')
+  ) {
+    return true
+  }
+  return (
+    name.endsWith('.md') ||
+    name.endsWith('.rst') ||
+    name.endsWith('.txt') ||
+    name.endsWith('.png') ||
+    name.endsWith('.jpg') ||
+    name.endsWith('.jpeg') ||
+    name.endsWith('.gif') ||
+    name.endsWith('.svg') ||
+    name.endsWith('.ico') ||
+    name.endsWith('.ipynb') ||
+    name.endsWith('.csv') ||
+    name.endsWith('.json') ||
+    name.endsWith('.yml') ||
+    name.endsWith('.yaml') ||
+    name.endsWith('.toml') ||
+    name.endsWith('.lock')
+  )
+}
+
 export function buildRepoStory(
   nodes: GraphNode[],
   edges: GraphEdge[],
   commits: TimelineCommit[],
 ): RepoStoryModel {
-  let fileNodes = nodes.filter((node) => node.kind === 'file')
+  let fileNodes = nodes.filter(
+    (node) => node.kind === 'file' && !isNonCodePath(node.path),
+  )
 
   // Fallback: synthesize file nodes from commit touches (history-only / empty graph)
   if (fileNodes.length === 0 && commits.length > 0) {
     const churn = new Map<string, { commits: number; weight: number }>()
     for (const commit of commits) {
       for (const path of commit.filesChanged) {
-        if (!path || path.includes('node_modules')) {
+        if (!path || path.includes('node_modules') || isNonCodePath(path)) {
           continue
         }
         const current = churn.get(path) ?? { commits: 0, weight: 0 }
@@ -93,7 +134,8 @@ export function buildRepoStory(
     .map((node) => {
       const inn = inDegree.get(node.path) ?? 0
       const out = outDegree.get(node.path) ?? 0
-      const score = inn * 3 + out * 2 + node.commitCount * 1.5 + node.churn * 0.02
+      // Primary: in-degree; secondary: out-degree; commit count is only a tiebreaker.
+      const score = inn * 1000 + out * 10 + node.commitCount * 0.01
       let role: SpineFile['role'] = 'active'
       if (inn === 0 && out > 0) {
         role = 'entry'
@@ -115,7 +157,8 @@ export function buildRepoStory(
         role,
       }
     })
-    .sort((a, b) => b.score - a.score)
+    .filter((file) => file.inDegree > 0 || file.outDegree > 0)
+    .sort((a, b) => b.score - a.score || b.commitCount - a.commitCount)
     .slice(0, 8)
 
   const hotCommit =
@@ -143,11 +186,11 @@ export function chapterCopy(
   switch (chapter) {
     case 'overview':
       return {
-        title: 'The story of this codebase',
+        title: 'Understand this codebase',
         body:
           mode === 'HISTORY_ONLY'
-            ? 'Import links are sparse — we sample the hottest files from history so every public repo still gets a spine.'
-            : 'We’ll walk the spine of the repo: the files that hold it together, how they link, and what changed recently.',
+            ? 'A short brief from history and structure — then a guided path through the files that matter.'
+            : 'A plain-English brief, the files to read first, a typical import path, and a short guided tour.',
       }
     case 'spine':
       return {
@@ -163,6 +206,11 @@ export function chapterCopy(
       return {
         title: 'What moved lately',
         body: 'Scrub the timeline — each beat highlights files touched in that commit. Change is the soundtrack.',
+      }
+    case 'playground':
+      return {
+        title: 'How it hangs together',
+        body: 'Brief + tour + follow-path on the tree. Trunk is the hub, branches are folders, leaves are files — learn the whole repo by walking it.',
       }
   }
 }

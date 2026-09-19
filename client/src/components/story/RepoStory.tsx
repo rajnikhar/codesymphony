@@ -6,6 +6,7 @@ import type {
   GraphNode,
   RepositoryMode,
   TimelineCommit,
+  TreeResponse,
 } from '../../types'
 import { useSceneEnter } from '../../hooks/useGsapScene'
 import {
@@ -14,6 +15,8 @@ import {
   type StoryChapter,
 } from '../../utils/story'
 import { FileStoryCinema } from './FileStoryCinema'
+import { OverviewExplain } from './OverviewExplain'
+import { PlaygroundPanel } from './PlaygroundPanel'
 import { RiveSignature } from './RiveSignature'
 import { WebGLDepthLazy } from './WebGLDepthLazy'
 
@@ -26,12 +29,19 @@ type RepoStoryProps = {
   chapter: StoryChapter
   onChapterChange: (chapter: StoryChapter) => void
   scrubIndex: number
+  playing: boolean
+  loading: boolean
+  tree: TreeResponse | null
   neighborhood: FileNeighborhood | null
   explanation: ExplainFileResponse | null
   explaining: boolean
   onSelectFile: (path: string) => void
   onAskExplain: () => void
   onCloseFocus: () => void
+  onScrubIndexChange: (index: number) => void
+  onTogglePlayback: () => void
+  onReplayGrowth: () => void
+  onRetry: () => void
 }
 
 const CHAPTERS: { id: StoryChapter; label: string }[] = [
@@ -39,6 +49,7 @@ const CHAPTERS: { id: StoryChapter; label: string }[] = [
   { id: 'spine', label: 'Spine' },
   { id: 'links', label: 'Links' },
   { id: 'history', label: 'History' },
+  { id: 'playground', label: 'Playground' },
 ]
 
 function shortName(path: string): string {
@@ -67,12 +78,19 @@ export function RepoStory({
   chapter,
   onChapterChange,
   scrubIndex,
+  playing,
+  loading,
+  tree,
   neighborhood,
   explanation,
   explaining,
   onSelectFile,
   onAskExplain,
   onCloseFocus,
+  onScrubIndexChange,
+  onTogglePlayback,
+  onReplayGrowth,
+  onRetry,
 }: RepoStoryProps) {
   const story = useMemo(
     () => buildRepoStory(nodes, edges, commits),
@@ -80,9 +98,6 @@ export function RepoStory({
   )
   const copy = chapterCopy(chapter, mode)
   const activeCommit = commits[scrubIndex] ?? story.hotCommit
-  const repoLabel = canonicalUrl
-    ? canonicalUrl.replace(/^https?:\/\/(www\.)?github\.com\//, '')
-    : 'this repository'
 
   const sceneRef = useSceneEnter(`chapter:${chapter}`)
   const scrubProgress =
@@ -141,44 +156,16 @@ export function RepoStory({
           </div>
 
           {chapter === 'overview' && (
-            <div className="overview-grid">
-              <article className="stat-card" data-animate="item">
-                <span className="stat-value">{story.fileNodes.length}</span>
-                <span className="stat-label">Files in the map</span>
-              </article>
-              <article className="stat-card" data-animate="item">
-                <span className="stat-value">{story.edgeCount}</span>
-                <span className="stat-label">Import links</span>
-              </article>
-              <article className="stat-card" data-animate="item">
-                <span className="stat-value">{commits.length}</span>
-                <span className="stat-label">Commits tracked</span>
-              </article>
-              <article className="overview-copy" data-animate="item">
-                <p>
-                  You’re looking at <strong>{repoLabel}</strong>
-                  {mode === 'HISTORY_ONLY'
-                    ? ' in history-focused mode (hottest files sampled for your machine’s safety).'
-                    : ' with a full import story.'}
-                </p>
-                <p className="muted-line">
-                  Move through Spine → Links → History, or open a file from the
-                  spine.
-                </p>
-                <div className="chapter-jump">
-                  <button type="button" onClick={() => onChapterChange('spine')}>
-                    Meet the spine
-                  </button>
-                  <button
-                    type="button"
-                    className="ghost"
-                    onClick={() => onChapterChange('history')}
-                  >
-                    Watch history
-                  </button>
-                </div>
-              </article>
-            </div>
+            <OverviewExplain
+              nodes={nodes}
+              edges={edges}
+              commits={commits}
+              tree={tree}
+              mode={mode}
+              canonicalUrl={canonicalUrl}
+              onSelectFile={onSelectFile}
+              onChapterChange={onChapterChange}
+            />
           )}
 
           {chapter === 'spine' && (
@@ -265,6 +252,25 @@ export function RepoStory({
                 <p className="muted-line">No commits loaded yet.</p>
               )}
             </div>
+          )}
+
+          {chapter === 'playground' && (
+            <PlaygroundPanel
+              tree={tree}
+              nodes={nodes}
+              edges={edges}
+              commits={commits}
+              mode={mode}
+              canonicalUrl={canonicalUrl}
+              scrubIndex={scrubIndex}
+              playing={playing}
+              loading={loading}
+              onScrubIndexChange={onScrubIndexChange}
+              onTogglePlayback={onTogglePlayback}
+              onReplayGrowth={onReplayGrowth}
+              onOpenFileStory={onSelectFile}
+              onRetry={onRetry}
+            />
           )}
         </div>
       </div>

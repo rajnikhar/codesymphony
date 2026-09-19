@@ -8,6 +8,7 @@ const CHAPTER_Z: Record<StoryChapter, number> = {
   spine: 1,
   links: 2,
   history: 3,
+  playground: 4,
 }
 
 type WebGLDepthProps = {

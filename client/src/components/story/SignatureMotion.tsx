@@ -12,6 +12,7 @@ const CHAPTER_INDEX: Record<StoryChapter, number> = {
   spine: 1,
   links: 2,
   history: 3,
+  playground: 4,
 }
 
 type Ribbon = {

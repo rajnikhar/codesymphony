@@ -117,7 +117,9 @@ public class DependencyGraphService {
     if (graph.mode() == RepositoryMode.HISTORY_ONLY || graph.edges().isEmpty()) {
       return buildHistoryOnlyDirectoryGraph(graph, maxVisible);
     }
-    return buildImportDirectoryGraph(graph, maxVisible);
+    // Layered client layout needs file-level nodes; directory collapse is no
+    // longer the primary simplification mechanism.
+    return buildFileLevelGraph(graph, maxVisible);
   }
 
   private GraphResponse buildImportDirectoryGraph(RepositoryGraph graph, int maxVisible) {
@@ -182,10 +184,12 @@ public class DependencyGraphService {
         centralityService.computeFileCentralityScores(graph.files(), graph.edges());
     List<SourceFile> selected =
         graph.files().stream()
+            .filter(file -> !CentralityService.isNonCodePath(file.path()))
             .sorted(
                 Comparator.comparingDouble(
                         (SourceFile file) -> scores.getOrDefault(file.path(), 0.0))
                     .reversed()
+                    .thenComparing(SourceFile::commitCount, Comparator.reverseOrder())
                     .thenComparing(SourceFile::churn, Comparator.reverseOrder()))
             .limit(maxVisible)
             .toList();

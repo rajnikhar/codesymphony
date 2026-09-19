@@ -16,7 +16,9 @@ export function RivePlayer({ chapter, focus, src }: RivePlayerProps) {
         ? 1
         : chapter === 'links'
           ? 2
-          : 3
+          : chapter === 'history'
+            ? 3
+            : 4
 
   const { RiveComponent, rive } = useRive({
     src,

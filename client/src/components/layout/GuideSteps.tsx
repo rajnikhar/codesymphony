@@ -19,7 +19,7 @@ export function GuideSteps({
     {
       id: 2,
       title: 'Walk the chapters',
-      body: 'Overview → Spine → Links → History. Pick a file when something catches you.',
+      body: 'Overview gives the brief and tour. Then Spine → Links → History, or Playground.',
       done: hasSelection,
     },
     {
@@ -35,8 +35,8 @@ export function GuideSteps({
       <div className="guide-intro">
         <h2>Walk the exhibition, don’t decode a graph</h2>
         <p>
-          Chapters and explanations lead. The advanced map is available if you
-          want the raw layout — never required.
+          Chapters and explanations lead. Open Playground to learn connections
+          on the tree — never required.
         </p>
       </div>
       <ol className="guide-steps">

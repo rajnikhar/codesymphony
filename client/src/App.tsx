@@ -49,15 +49,15 @@ function App() {
           status={story.status}
           mode={story.mode}
           canonicalUrl={story.canonicalUrl}
-          fullGraph={story.fullGraph!}
+          fullGraph={story.fullGraph}
+          tree={story.tree}
           commits={story.commits}
           chapter={story.chapter}
           scrubIndex={story.scrubIndex}
+          playing={story.playing}
           neighborhood={story.neighborhood}
           explanation={story.explanation}
           explaining={story.explaining}
-          showAdvancedMap={story.showAdvancedMap}
-          pulsedPaths={story.pulsedPaths}
           loading={story.loading}
           onDismissStatus={() => story.setStatus(null)}
           onGoHome={story.goHome}
@@ -67,7 +67,11 @@ function App() {
           onAskExplain={() => void story.askExplain()}
           onCloseFocus={story.closeFocus}
           onScrubIndexChange={story.changeScrubIndex}
-          onToggleAdvancedMap={story.toggleAdvancedMap}
+          onTogglePlayback={story.togglePlayback}
+          onReplayGrowth={story.replayGrowth}
+          onRetry={() =>
+            void story.runIngest(story.url || story.canonicalUrl || '')
+          }
         />
       )}
     </div>

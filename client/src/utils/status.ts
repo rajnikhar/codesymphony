@@ -35,12 +35,24 @@ export function friendlyError(error: unknown): AppStatus {
     }
   }
 
+  if (
+    lower.includes('failed to clone') ||
+    lower.includes('git clone') ||
+    (lower.includes('repository') && lower.includes('not found') && !lower.includes('source file'))
+  ) {
+    return {
+      tone: 'error',
+      title: "Couldn't clone that URL",
+      detail: "Check it's a public repo.",
+    }
+  }
+
   if (lower.includes('404') || lower.includes('not found')) {
     return {
       tone: 'error',
-      title: 'That repository wasn’t found',
+      title: 'That step wasn’t found on the API',
       detail:
-        'Use a public GitHub URL you can open in a browser. Private repos need credentials we don’t have yet.',
+        'Restart Spring Boot on :8090 so it picks up the latest endpoints, then try again.',
     }
   }
 

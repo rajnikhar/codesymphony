@@ -18,10 +18,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class CacheConfig {
 
   public static final String PARSED_REPOSITORY_CACHE = "parsedRepositories";
+  public static final String REPOSITORY_TREE_CACHE = "repositoryTrees";
 
   @Bean
   CacheManager cacheManager() {
-    CaffeineCacheManager cacheManager = new CaffeineCacheManager(PARSED_REPOSITORY_CACHE);
+    CaffeineCacheManager cacheManager =
+        new CaffeineCacheManager(PARSED_REPOSITORY_CACHE, REPOSITORY_TREE_CACHE);
     cacheManager.setCaffeine(
         Caffeine.newBuilder().maximumSize(50).expireAfterWrite(1, TimeUnit.HOURS));
     return cacheManager;

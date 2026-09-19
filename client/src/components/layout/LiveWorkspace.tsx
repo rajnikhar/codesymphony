@@ -5,13 +5,12 @@ import type {
   GraphResponse,
   RepositoryMode,
   TimelineCommit,
+  TreeResponse,
 } from '../../types'
 import type { AppStatus } from '../../utils/status'
 import type { StoryChapter } from '../../utils/story'
-import { TimelineScrubber } from '../timeline/TimelineScrubber'
 import { RepoStory } from '../story/RepoStory'
 import { StoryEmpty } from '../story/StoryStates'
-import { AdvancedMapPanel } from './AdvancedMapPanel'
 import { StatusBanner } from './StatusBanner'
 import { TopRail } from './TopRail'
 
@@ -20,15 +19,15 @@ type LiveWorkspaceProps = {
   status: AppStatus
   mode: RepositoryMode | null
   canonicalUrl: string | null
-  fullGraph: GraphResponse
+  fullGraph: GraphResponse | null
+  tree: TreeResponse | null
   commits: TimelineCommit[]
   chapter: StoryChapter
   scrubIndex: number
+  playing: boolean
   neighborhood: FileNeighborhood | null
   explanation: ExplainFileResponse | null
   explaining: boolean
-  showAdvancedMap: boolean
-  pulsedPaths: Set<string>
   loading: boolean
   onDismissStatus: () => void
   onGoHome: () => void
@@ -38,7 +37,9 @@ type LiveWorkspaceProps = {
   onAskExplain: () => void
   onCloseFocus: () => void
   onScrubIndexChange: (index: number) => void
-  onToggleAdvancedMap: () => void
+  onTogglePlayback: () => void
+  onReplayGrowth: () => void
+  onRetry: () => void
 }
 
 export function LiveWorkspace({
@@ -47,14 +48,14 @@ export function LiveWorkspace({
   mode,
   canonicalUrl,
   fullGraph,
+  tree,
   commits,
   chapter,
   scrubIndex,
+  playing,
   neighborhood,
   explanation,
   explaining,
-  showAdvancedMap,
-  pulsedPaths,
   loading,
   onDismissStatus,
   onGoHome,
@@ -64,17 +65,14 @@ export function LiveWorkspace({
   onAskExplain,
   onCloseFocus,
   onScrubIndexChange,
-  onToggleAdvancedMap,
+  onTogglePlayback,
+  onReplayGrowth,
+  onRetry,
 }: LiveWorkspaceProps) {
-  const mapNodes = neighborhood
-    ? neighborhood.focusGraph.nodes
-    : fullGraph.nodes
-  const mapEdges = neighborhood
-    ? neighborhood.focusGraph.edges
-    : fullGraph.edges
+  const hasStory = Boolean(fullGraph && fullGraph.nodes.length > 0)
 
   return (
-    <>
+    <div className="live-shell">
       <TopRail
         canonicalUrl={canonicalUrl}
         mode={mode}
@@ -86,58 +84,37 @@ export function LiveWorkspace({
         <StatusBanner status={status} onDismiss={onDismissStatus} />
       </div>
 
-      <div className="stage-bleed" ref={stageRef}>
-        {fullGraph.nodes.length === 0 ? (
-          <div className="stage-inner">
-            <StoryEmpty variant="blank-graph" />
-          </div>
-        ) : (
+      {hasStory ? (
+        <div className="story-primary" ref={stageRef}>
           <RepoStory
-            nodes={fullGraph.nodes}
-            edges={fullGraph.edges}
+            nodes={fullGraph!.nodes}
+            edges={fullGraph!.edges}
             commits={commits}
             mode={mode}
             canonicalUrl={canonicalUrl}
             chapter={chapter}
             onChapterChange={onChapterChange}
             scrubIndex={scrubIndex}
+            playing={playing}
+            loading={loading}
+            tree={tree}
             neighborhood={neighborhood}
             explanation={explanation}
             explaining={explaining}
             onSelectFile={onSelectFile}
             onAskExplain={onAskExplain}
             onCloseFocus={onCloseFocus}
+            onScrubIndexChange={onScrubIndexChange}
+            onTogglePlayback={onTogglePlayback}
+            onReplayGrowth={onReplayGrowth}
+            onRetry={onRetry}
           />
-        )}
-      </div>
-
-      <div className="below-stage">
-        <TimelineScrubber
-          commits={commits}
-          index={scrubIndex}
-          onIndexChange={onScrubIndexChange}
-          disabled={loading}
-        />
-
-        <div className="advanced-toggle">
-          <button type="button" className="ghost" onClick={onToggleAdvancedMap}>
-            {showAdvancedMap ? 'Hide advanced map' : 'Show advanced map'}
-          </button>
-          <span className="muted-line advanced-hint">
-            Optional raw dependency layout.
-          </span>
         </div>
-
-        {showAdvancedMap && (
-          <AdvancedMapPanel
-            nodes={mapNodes}
-            edges={mapEdges}
-            pulsedPaths={pulsedPaths}
-            selectedPath={neighborhood?.path ?? null}
-            onFileClick={onSelectFile}
-          />
-        )}
-      </div>
-    </>
+      ) : (
+        <div className="story-primary story-primary-empty" ref={stageRef}>
+          <StoryEmpty variant="blank-graph" />
+        </div>
+      )}
+    </div>
   )
 }

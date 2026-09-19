@@ -7,9 +7,9 @@ from app.extractors.common import ExtractedImport
 from app.extractors.java_lang import extract_java_imports
 from app.extractors.javascript import extract_javascript_imports
 from app.extractors.python_lang import extract_python_imports
+from app.file_index import FileIndex, build_file_index
 from app.models import ImportEdge, ParseResponse, ParseStats, ParsedFile
 from app.resolve import (
-    build_path_index,
     resolve_java_import,
     resolve_javascript_import,
     resolve_python_import,
@@ -22,7 +22,7 @@ def parse_repository(repository_root: Path) -> ParseResponse:
         return _empty_history_only()
 
     files, skipped_unsupported = collect_allowlisted_files(repository_root)
-    path_index = build_path_index(repository_root, files)
+    file_index = build_file_index(repository_root, files)
 
     parsed_files: list[ParsedFile] = []
     edges: list[ImportEdge] = []
@@ -37,15 +37,16 @@ def parse_repository(repository_root: Path) -> ParseResponse:
             continue
         parsed_files.append(ParsedFile(path=relative, language=language))
 
-        source = file_path.read_bytes()
         try:
+            source = file_path.read_bytes()
             extracted = _extract_imports(file_path, language, source)
         except Exception:
             # Keep ingest alive if one file's grammar/query fails
             continue
+
         for item in extracted:
             target = _resolve_import(
-                repository_root, relative, language, item, path_index
+                repository_root, relative, language, item, file_index
             )
             if target is None:
                 unresolved += 1
@@ -85,11 +86,11 @@ def _resolve_import(
     importer_relative_path: str,
     language: str,
     item: ExtractedImport,
-    path_index: dict[str, str],
+    file_index: FileIndex,
 ) -> str | None:
     if language in {"js", "ts"}:
         return resolve_javascript_import(
-            repository_root, importer_relative_path, item.specifier, path_index
+            repository_root, importer_relative_path, item.specifier, file_index
         )
     if language == "py":
         return resolve_python_import(
@@ -98,10 +99,10 @@ def _resolve_import(
             item.specifier,
             item.is_relative,
             item.relative_level,
-            path_index,
+            file_index,
         )
     if language == "java":
-        return resolve_java_import(repository_root, item.specifier, path_index)
+        return resolve_java_import(repository_root, item.specifier, file_index)
     return None
 
 
