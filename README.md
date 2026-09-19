@@ -31,3 +31,7 @@ cd client && npm install && npm run dev
 ```
 
 Open `http://localhost:5173`, paste a GitHub URL, Visualize, scrub the timeline.
+
+## Free hosting (Render + Cloudflare)
+
+See **[DEPLOY.md](./DEPLOY.md)** — Dockerfile is built **on Render** (no Docker needed on your laptop).

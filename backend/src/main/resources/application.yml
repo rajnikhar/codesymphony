@@ -1,14 +1,7 @@
-server:
-  port: 8090
-
-spring:
-  application:
-    name: codesymphony-core
-
 codesymphony:
   max-ingested-files: 800
   max-visible-nodes: 150
-  parser-base-url: http://localhost:8001
+  parser-base-url: ${CODESYMPHONY_PARSER_BASE_URL:http://127.0.0.1:8001}
   clone-dir: ${java.io.tmpdir}/codesymphony-clones
   history-only-parseable-ratio: 0.05
   history-only-min-edge-count: 1
@@ -16,6 +9,16 @@ codesymphony:
   max-repository-files-before-reject: 250000
   max-history-sample-files: 300
   clone-depth: 100
+  # Comma-separated browser origins (local + Cloudflare Pages URL in production).
+  cors-allowed-origins: ${CODESYMPHONY_CORS_ALLOWED_ORIGINS:http://localhost:5173}
+
+server:
+  # Render injects PORT; local default remains 8090.
+  port: ${PORT:8090}
+
+spring:
+  application:
+    name: codesymphony-core
 
 management:
   endpoints:

@@ -2,6 +2,7 @@ package com.codesymphony.core.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
@@ -9,6 +10,7 @@ import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -38,15 +40,27 @@ public class CacheConfig {
   }
 
   @Bean
-  WebMvcConfigurer corsConfigurer() {
+  WebMvcConfigurer corsConfigurer(CodeSymphonyProperties properties) {
+    String[] origins = splitOrigins(properties.corsAllowedOrigins());
     return new WebMvcConfigurer() {
       @Override
       public void addCorsMappings(CorsRegistry registry) {
         registry
             .addMapping("/api/**")
-            .allowedOrigins("http://localhost:5173")
-            .allowedMethods("GET", "POST", "OPTIONS");
+            .allowedOrigins(origins)
+            .allowedMethods("GET", "POST", "OPTIONS")
+            .allowCredentials(true);
       }
     };
+  }
+
+  static String[] splitOrigins(String raw) {
+    if (!StringUtils.hasText(raw)) {
+      return new String[] {"http://localhost:5173"};
+    }
+    return Arrays.stream(raw.split(","))
+        .map(String::trim)
+        .filter(StringUtils::hasText)
+        .toArray(String[]::new);
   }
 }

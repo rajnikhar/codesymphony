@@ -10,6 +10,12 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+  private final CodeSymphonyProperties properties;
+
+  public WebSocketConfig(CodeSymphonyProperties properties) {
+    this.properties = properties;
+  }
+
   @Override
   public void configureMessageBroker(MessageBrokerRegistry registry) {
     registry.enableSimpleBroker("/topic", "/queue");
@@ -19,12 +25,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
   @Override
   public void registerStompEndpoints(StompEndpointRegistry registry) {
-    registry
-        .addEndpoint("/ws")
-        .setAllowedOriginPatterns("http://localhost:*", "http://127.0.0.1:*");
-    registry
-        .addEndpoint("/ws-sockjs")
-        .setAllowedOriginPatterns("http://localhost:*", "http://127.0.0.1:*")
-        .withSockJS();
+    String[] origins = CacheConfig.splitOrigins(properties.corsAllowedOrigins());
+    // Patterns cover localhost ports and exact production Pages URLs from env.
+    String[] patterns = new String[origins.length + 2];
+    System.arraycopy(origins, 0, patterns, 0, origins.length);
+    patterns[origins.length] = "http://localhost:*";
+    patterns[origins.length + 1] = "http://127.0.0.1:*";
+
+    registry.addEndpoint("/ws").setAllowedOriginPatterns(patterns);
+    registry.addEndpoint("/ws-sockjs").setAllowedOriginPatterns(patterns).withSockJS();
   }
 }
